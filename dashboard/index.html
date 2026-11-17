@@ -2,13 +2,40 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=1440">
 <title>Landfall — token launch radar</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
-<a class="skip" href="#board">Skip to the board</a>
-<main id="board" tabindex="-1" aria-busy="true"></main>
+<header class="top">
+  <div class="brand"><span class="dot"></span><h1>Landfall</h1><span class="sub">TOKEN LAUNCH RADAR</span></div>
+  <div class="meta"><span id="snapLine"></span><span id="modelLine"></span><span class="badge" id="watchBadge"></span><span class="badge ok" id="recomputeBadge"></span></div>
+</header>
+<main>
+  <section class="hero">
+    <h2 id="headline"></h2>
+    <p id="lede"></p>
+    <dl class="stats" id="statStrip"></dl>
+  </section>
+  <section id="top5" aria-label="Top five protocols"></section>
+  <div id="farmNext" aria-label="Farm next"></div>
+  <nav class="tabs" id="tabs"></nav>
+  <div class="filters" id="filters"></div>
+  <div id="boardWrap">
+    <table id="board">
+      <thead><tr id="headRow"></tr></thead>
+      <tbody id="bodyRows"></tbody>
+    </table>
+    <p class="count" id="rowCount"></p>
+  </div>
+  <section id="method" hidden></section>
+  <section id="altTab" hidden></section>
+</main>
+<footer>
+  <p>Every protocol on this board records no token — never has none: a record may still miss a token a protocol already issued. An implied value is a model, not a price.</p>
+  <p id="footLine"></p>
+</footer>
+<div id="modal" hidden></div>
 <script src="../data.js"></script>
 <script src="app.js"></script>
 </body>
