@@ -2,40 +2,128 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=1440">
-<title>Landfall — token launch radar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landfall — Token Launch Radar</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="dot"></span><h1>Landfall</h1><span class="sub">TOKEN LAUNCH RADAR</span></div>
-  <div class="meta"><span id="snapLine"></span><span id="modelLine"></span><span class="badge" id="watchBadge"></span><span class="badge ok" id="recomputeBadge"></span></div>
+  <div class="brand"><span class="dot"></span><strong>Landfall</strong><span class="sub">TOKEN LAUNCH RADAR</span></div>
+  <div class="badges">
+    <span class="badge" id="badgeWatch">Watchlist 40/40</span>
+    <span class="badge" id="badgeRecompute">Recomputed here: —</span>
+    <span class="badge">Model landfall-3</span>
+  </div>
 </header>
 <main>
-  <section class="hero">
-    <h2 id="headline"></h2>
-    <p id="lede"></p>
-    <dl class="stats" id="statStrip"></dl>
-  </section>
-  <section id="top5" aria-label="Top five protocols"></section>
-  <div id="farmNext" aria-label="Farm next"></div>
-  <nav class="tabs" id="tabs"></nav>
-  <div class="filters" id="filters"></div>
-  <div id="boardWrap">
-    <table id="board">
-      <thead><tr id="headRow"></tr></thead>
-      <tbody id="bodyRows"></tbody>
-    </table>
-    <p class="count" id="rowCount"></p>
+<section class="hero">
+  <h1><span id="heroCount">198</span> protocols record no token. The market&rsquo;s own size curve prices them at <span id="heroTotal">$2.33B</span>.</h1>
+  <p class="lede">One curve, one factor, no cherry-picking. Every value below is recomputed in your browser from the same snapshot the board was built on — change a filter and the table re-ranks from the same numbers.</p>
+</section>
+<section class="stats" id="stats"></section>
+<section class="cards" id="topCards" aria-label="Top five by launch value"></section>
+<div class="farmnext" id="farmNext"></div>
+<nav class="tabs" id="tabs">
+  <button data-tab="board" class="on">No token yet <b id="tabBoardN">198</b></button>
+  <button data-tab="traded">Token trades <b id="tabTradedN">416</b></button>
+  <button data-tab="setaside">Set aside <b id="tabSetN">144</b></button>
+  <button data-tab="method">Method &amp; calibration</button>
+</nav>
+<section class="panel" id="panel-board">
+  <div class="filters">
+    <input id="fSearch" type="search" placeholder="Search a protocol…" aria-label="Search">
+    <select id="fCat" aria-label="Category"><option value="">All categories</option></select>
+    <select id="fChain" aria-label="Chain"><option value="">All chains</option></select>
+    <select id="fVerdict" aria-label="Verdict">
+      <option value="">All verdicts</option><option>ROBUST</option><option>FARM</option><option>THIN</option><option>SKIP</option>
+    </select>
+    <select id="fTvl" aria-label="Minimum TVL">
+      <option value="0">Any TVL</option><option value="50000000">TVL ≥ $50M</option><option value="100000000">TVL ≥ $100M</option><option value="500000000">TVL ≥ $500M</option><option value="1000000000">TVL ≥ $1B</option>
+    </select>
+    <select id="fMom" aria-label="7-day momentum">
+      <option value="">Any 7-day move</option><option value="up">Rising (7d &gt; 0)</option><option value="down">Falling (7d &lt; 0)</option>
+    </select>
+    <select id="fScope" aria-label="Scope">
+      <option value="">Watchlist + early</option><option value="watchlist">Watchlist only</option><option value="early">Early only</option>
+    </select>
+    <button id="fReset" type="button">Reset</button>
   </div>
-  <section id="method" hidden></section>
-  <section id="altTab" hidden></section>
+  <div class="tablewrap">
+    <table id="boardTable">
+      <thead><tr>
+        <th data-sort="rank">Rank</th><th data-sort="name">Protocol</th><th data-sort="tvl_usd">TVL</th>
+        <th data-sort="change_7d">7d</th><th data-sort="age_days">No-token for</th><th data-sort="implied_value_usd">Implied value</th>
+        <th data-sort="slice_usd">$1k slice</th><th data-sort="net_usd">Net · $/h</th><th data-sort="break_even_deposit_usd">Break-even deposit</th>
+        <th data-sort="verdict">Verdict</th><th>Farm plan</th>
+      </tr></thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+  </div>
+  <p class="count" id="boardCount"></p>
+</section>
+<section class="panel hidden" id="panel-traded">
+  <p class="note">The 416 protocols that already record a token. They are not ranked — they are the market the curve is fitted on, and the comparables in every detail view.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Protocol</th><th>Category</th><th>Chains</th><th>TVL</th><th>Market cap</th><th>Mcap / TVL</th></tr></thead>
+    <tbody id="tradedBody"></tbody>
+  </table></div>
+</section>
+<section class="panel hidden" id="panel-setaside">
+  <p class="note">144 protocols that record no token but are set aside by rule, not ranked: wrapped, staked or bridged products of a token that trades, versioned copies, and exchange products.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Protocol</th><th>Category</th><th>Chains</th><th>TVL</th><th>Set aside because</th></tr></thead>
+    <tbody id="setBody"></tbody>
+  </table></div>
+</section>
+<section class="panel hidden" id="panel-method">
+  <div class="methodgrid">
+    <div class="mbox">
+      <h2>How a value is built</h2>
+      <p>log<sub>10</sub>(market cap) = <b id="mA">2.9082</b> + <b id="mB">0.5387</b> · log<sub>10</sub>(TVL), fitted on <b id="mComps">86</b> traded comps. Comp market caps are winsorized at their 90th percentile (<b id="mCap">$104M</b>) <i>when fitting only</i>. One factor, momentum: 1 + 0.5 × (7-day TVL change), clamped to 0.6–1.6. At $100M of TVL the curve pays <b id="mLevel">×0.165</b> of TVL.</p>
+      <p>Nothing else is in the model. Category effects, seasoning, breadth and the sibling factor were each tested out of sample and dropped — see the ablation below. There is no sibling factor in this build at all, so the round-2 self-match bug (a protocol matched against its own name during validation, overstating accuracy ~20%) cannot recur.</p>
+      <h2>The comps</h2>
+      <p>Traded protocols with a market cap, mcap/TVL between 0.01 and 30, and no excluded category (Bridge, Canonical Bridge, Liquid Staking, Liquid Restaking, Restaked BTC, CEX). That rule keeps <b id="mComps2">86</b> comps and excludes <b id="mExcl">42</b> traded names. The board is the other 342 protocols that record no token, minus the 144 set aside by rule: 40 watchlist + 158 early = 198 rows.</p>
+      <h2>The clock</h2>
+      <p>Logistic has-token ~ log(age) + category over all 758 protocols. Out-of-sample log-loss <b id="mClockOos">0.624</b> against a constant <b id="mClockConst">0.688</b> — a real signal, but a weak one, so it is an <i>informational</i> 12-month launch-odds column only. It never ranks a row and never sets a verdict on its own; it multiplies the expected slice and orders Farm Next.</p>
+      <h2>The farm economics</h2>
+      <p>A $1,000 ticket. Slice = 10% × implied × ($1,000 / TVL). Net = slice × 12-month odds − gas − $5 bridge fees − the 4% T-bill yield forgone over 30 days. Gas per transaction: Ethereum $15, Base $3, Arbitrum $3, Avalanche $2, Polygon $2, Solana $1, Sui $1, other chains $5; two transactions per plan. Hands-on time is 1.5 hours plus 30 minutes per extra chain (capped at 3 extra). ROBUST means net &gt; 0 even at the band low; FARM means net &gt; 0 at the point estimate; THIN means it beats the cash fees only; SKIP means it does not.</p>
+      <p>Break-even deposit: the deposit D that makes expected net zero at the row&rsquo;s own implied value, D = costs × TVL / (0.10 × implied × odds). The top rows need deposits of tens of thousands of dollars at a $1,000 ticket — that is what the economics say, and the cards lead with it instead of hiding behind a bare SKIP.</p>
+    </div>
+    <div class="mbox">
+      <h2>Out of sample — honest numbers</h2>
+      <p>Validation uses the <i>same</i> prediction function as the board: same fit, same momentum, nothing extra. Leave-one-out median miss <b id="mLoo">×2.98</b> (<b id="mLoo3">51%</b> within 3×, <b id="mLoo10">85%</b> within 10×). Time-split — fit on tokens listed before 2024, test on the newer ones — median miss <b id="mTs">×2.00</b> (<b id="mTs3">67%</b> within 3×). A flat multiple for every protocol misses by <b id="mFlatLoo">×3.80</b> leave-one-out and <b id="mFlatTs">×3.64</b> on the time-split: the curve earns its keep, but only just.</p>
+      <table class="ablation">
+        <thead><tr><th>Model</th><th>Leave-one-out</th><th>Time-split</th></tr></thead>
+        <tbody id="ablationBody"></tbody>
+      </table>
+      <p class="small">Ablation, honest: flat multiple → size curve → + momentum → + winsorized fit. Category, seasoning, breadth and sibling were each tested and dropped: none improved <i>both</i> metrics (category made the time-split worse, seasoning made it worse, breadth was worse than flat, sibling was the self-match bug). The steps above are the whole model.</p>
+      <h2>The band, stated plainly</h2>
+      <p>Each row carries a P10–P90 band from 200 bootstrap refits of the curve. The band is wide — across the comps the P10–P90 residual factors run <b id="mBandLo">0.18×</b> to <b id="mBandHi">8.28×</b> — and a band built from its own residuals covers ~80% by construction (<b id="mBandR2">80.2%</b>). The honest cross-fitted coverage, where each fold&rsquo;s band limits come from the other folds, is <b id="mBandHonest">77.9%</b>. Ranks 1–12 are exact under the 200 refits; the order at the top is not a coin flip.</p>
+    </div>
+  </div>
+</section>
+<section class="below">
+  <div class="mbox">
+    <h2>Out of sample</h2>
+    <p>Leave-one-out median miss <b id="bLoo">×2.98</b>; time-split <b id="bTs">×2.00</b>. The curve earns its keep over a flat multiple (<b id="bFlat">×3.80</b>), but only just — the honest band is wide, and the dashboard says so on every row.</p>
+    <canvas id="scatter" width="640" height="300"></canvas>
+    <p class="small">Log–log: traded comps (grey), the fitted curve (line), its P10–P90 band (shaded), the 198 board rows (blue). A point far above the line is a protocol the market would price above its TVL peers.</p>
+  </div>
+  <div class="mbox">
+    <h2>Where the value sits</h2>
+    <div id="hist"></div>
+    <p class="small">Implied value of the 198 pre-token rows, log buckets. Most of the $2.33B sits in a handful of large risk managers; the long tail is where the farm plans that pay live.</p>
+    <h2>What this is not</h2>
+    <p>Implied value is a model, not a price. It says what the market pays for traded protocols of this size, applied to one that records no token. A launch is not promised, the odds column is a weak signal, and a SKIP at $1,000 is the economics talking, not a judgement on the protocol.</p>
+  </div>
+</section>
 </main>
 <footer>
-  <p>Every protocol on this board records no token — never has none: a record may still miss a token a protocol already issued. An implied value is a model, not a price.</p>
-  <p id="footLine"></p>
+  <p>Landfall · snapshot <span id="fAsOf">2026-11-14</span>, DefiLlama protocol index · model landfall-3 · 758 protocols, 342 record no token, never &ldquo;has none&rdquo; · implied value is a model, not a price.</p>
 </footer>
-<div id="modal" hidden></div>
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true">
+  <div class="modalbox" id="modalBox"></div>
+</div>
 <script src="../data.js"></script>
 <script src="app.js"></script>
 </body>
